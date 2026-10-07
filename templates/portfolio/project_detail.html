@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ project.title }} | LensCraft{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <!-- Project Header -->
+    <div style="margin-bottom: 40px; text-align: center;">
+        <span class="hero-badge">{{ project.category.name }}</span>
+        <h1 class="hero-title" style="margin-top: 10px;">{{ project.title }}</h1>
+        <div class="project-meta" style="justify-content: center; margin-bottom: 20px;">
+            {% if project.location %}<span>📍 {{ project.location }}</span>{% endif %}
+            {% if project.event_date %}<span>📅 {{ project.event_date|date:"Y-m-d" }}</span>{% endif %}
+        </div>
+        {% if project.description %}
+            <p style="color: var(--text-muted); max-width: 800px; margin: 0 auto; font-size: 1.05rem;">
+                {{ project.description }}
+            </p>
+        {% endif %}
+    </div>
+
+    <!-- Main Cover Image -->
+    {% if project.cover_image %}
+        <div style="border-radius: var(--radius); overflow: hidden; max-height: 500px; margin-bottom: 40px; border: 1px solid var(--border-color);">
+            <img src="{{ project.cover_image.url }}" alt="{{ project.title }}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+        </div>
+    {% endif %}
+
+    <!-- Video Section -->
+    {% if project.video_clip %}
+        <div style="margin-bottom: 40px;">
+            <video
+                width="100%"
+                height="auto"
+                controls
+                style="border-radius: var(--radius); border: 1px solid var(--border-color); display: block;"
+            >
+                <source src="{{ project.video_clip.url }}" type="video/mp4">
+                متصفحك لا يدعم تشغيل الفيديو. حاول استخدام متصفح أحدث.
+            </video>
+        </div>
+    {% endif %}
+
+    <!-- Gallery Images Section -->
+    {% if gallery_images %}
+        <h2 class="section-title" style="font-size: 1.5rem; text-align: right; margin-bottom: 20px;">ألبوم الصور</h2>
+        <div class="gallery-grid">
+            {% for item in gallery_images %}
+                <div class="gallery-item">
+                    <img src="{{ item.image.url }}" alt="{{ item.caption|default:project.title }}">
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Back Button -->
+    <div style="margin-top: 50px; text-align: center;">
+        <a href="{% url 'portfolio:list' %}" class="btn btn-secondary">العودة لمعرض الأعمال</a>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LensCraft | عدسة الإبداع{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <!-- Header / Navbar -->
+    <header class="navbar">
+        <div class="container">
+            <a href="{% url 'core:home' %}" class="logo">LENSCRAFT</a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="{% url 'core:home' %}">الرئيسية</a></li>
+                    <li><a href="{% url 'portfolio:list' %}">معرض الأعمال</a></li>
+                    <li><a href="{% url 'core:contact' %}">تواصل معي</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Dynamic Content -->
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; {% now "Y" %} LensCraft - جميع الحقوق محفوظة</p>
+        </div>
+    </footer>
+
+</body>
+</html>

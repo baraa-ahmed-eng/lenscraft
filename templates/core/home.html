@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% if profile %}{{ profile.name }} | {{ profile.title }}{% else %}LensCraft | الرئيسية{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <span class="hero-badge">مصور فوتوغرافي محترف</span>
+            <h1 class="hero-title">{% if profile %}{{ profile.name }}{% else %}عدسة الإبداع{% endif %}</h1>
+            <h2 class="hero-subtitle">{% if profile %}{{ profile.title }}{% else %}توثيق اللحظات المميزة{% endif %}</h2>
+            <p class="hero-bio">
+                {% if profile %}
+                    {{ profile.bio }}
+                {% else %}
+                    أهلاً بك في موقعي الشخصي. أقدم خدمات تصوير احترافية لحفلات التخرج، الأعراس، والمناسبات الخاصة بجودة عالية ورؤية بصرية فريدة.
+                {% endif %}
+            </p>
+            <div>
+                <a href="{% url 'portfolio:list' %}" class="btn">مشاهدة الأعمال</a>
+                <a href="{% url 'core:contact' %}" class="btn btn-secondary">تواصل معي</a>
+            </div>
+        </div>
+        <div class="hero-image">
+            {% if profile and profile.profile_image %}
+                <img src="{{ profile.profile_image.url }}" alt="{{ profile.name }}">
+            {% else %}
+                <img src="https://images.unsplash.com/photo-1554048612-b6a482bc67e5?auto=format&fit=crop&w=800&q=80" alt="LensCraft">
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="section">
+        <h2 class="section-title">خدمات التصوير</h2>
+        <p class="section-desc">مجموعة متكاملة من الخدمات المصممة لتخليد أجمل ذكرياتكم</p>
+
+        <div class="services-grid">
+            {% for service in services %}
+                <div class="service-card">
+                    <h3>{{ service.title }}</h3>
+                    <p>{{ service.description }}</p>
+                </div>
+            {% empty %}
+                <div class="service-card">
+                    <h3>تصوير حفلات التخرج</h3>
+                    <p>جلسات تصوير فردية وجماعية للخريجين لتوثيق فرحة الإنجاز والتخرج بأعلى جودة.</p>
+                </div>
+                <div class="service-card">
+                    <h3>تصوير الأعراس والخطوبة</h3>
+                    <p>تغطية شاملة لكل تفاصيل يوم الزفاف والخطوبة بأسلوب سينمائي عصري.</p>
+                </div>
+                <div class="service-card">
+                    <h3>تصوير المناسبات والفعاليات</h3>
+                    <p>تغطية المؤتمرات والاحتفالات الخاصة والفعاليات العائلية باحترافية تامة.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Featured Projects Section -->
+    <section class="section">
+        <h2 class="section-title">أبرز الأعمال</h2>
+        <p class="section-desc">مختارات من أحدث الجلسات والمشاريع المميزة</p>
+
+        <div class="projects-grid">
+            {% for project in featured_projects %}
+                <a href="{% url 'portfolio:detail' project.slug %}" class="project-card">
+                    <div class="project-cover">
+                        {% if project.cover_image %}
+                            <img src="{{ project.cover_image.url }}" alt="{{ project.title }}">
+                        {% endif %}
+                    </div>
+                    <div class="project-info">
+                        <div class="project-category">{{ project.category.name }}</div>
+                        <h3 class="project-title">{{ project.title }}</h3>
+                        <div class="project-meta">
+                            {% if project.location %}<span>📍 {{ project.location }}</span>{% endif %}
+                            {% if project.event_date %}<span>📅 {{ project.event_date|date:"Y-m-d" }}</span>{% endif %}
+                        </div>
+                    </div>
+                </a>
+            {% empty %}
+                <p class="section-desc" style="grid-column: 1 / -1;">لا توجد مشاريع مميزة مضافة حالياً. يمكنك إضافتها من لوحة التحكم.</p>
+            {% endfor %}
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="{% url 'portfolio:list' %}" class="btn btn-secondary">عرض كل الأعمال</a>
+        </div>
+    </section>
+
+</div>
+{% endblock %}
