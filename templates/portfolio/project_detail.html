@@ -9,10 +9,17 @@
     <div style="margin-bottom: 40px; text-align: center;">
         <span class="hero-badge">{{ project.category.name }}</span>
         <h1 class="hero-title" style="margin-top: 10px;">{{ project.title }}</h1>
+
         <div class="project-meta" style="justify-content: center; margin-bottom: 20px;">
-            {% if project.location %}<span>📍 {{ project.location }}</span>{% endif %}
-            {% if project.event_date %}<span>📅 {{ project.event_date|date:"Y-m-d" }}</span>{% endif %}
+            {% if project.location %}
+                <span>📍 {{ project.location }}</span>
+            {% endif %}
+
+            {% if project.event_date %}
+                <span>📅 {{ project.event_date|date:"Y-m-d" }}</span>
+            {% endif %}
         </div>
+
         {% if project.description %}
             <p style="color: var(--text-muted); max-width: 800px; margin: 0 auto; font-size: 1.05rem;">
                 {{ project.description }}
@@ -20,10 +27,18 @@
         {% endif %}
     </div>
 
-    <!-- Main Cover Image -->
+    <!-- Main Cover Image - Clickable to open in lightbox -->
     {% if project.cover_image %}
-        <div style="border-radius: var(--radius); overflow: hidden; max-height: 500px; margin-bottom: 40px; border: 1px solid var(--border-color);">
-            <img src="{{ project.cover_image.url }}" alt="{{ project.title }}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+        <div
+            style="border-radius: var(--radius); overflow: hidden; margin-bottom: 40px; border: 1px solid var(--border-color); cursor: pointer;"
+            onclick="openCoverImage()"
+        >
+            <img
+                id="coverImage"
+                src="{{ project.cover_image.url }}"
+                alt="{{ project.title }}"
+                style="width: 100%; height: auto; display: block;"
+            >
         </div>
     {% endif %}
 
@@ -44,20 +59,259 @@
 
     <!-- Gallery Images Section -->
     {% if gallery_images %}
-        <h2 class="section-title" style="font-size: 1.5rem; text-align: right; margin-bottom: 20px;">ألبوم الصور</h2>
+        <h2 class="section-title" style="font-size: 1.5rem; text-align: right; margin-bottom: 20px;">
+            ألبوم الصور
+        </h2>
+
         <div class="gallery-grid">
             {% for item in gallery_images %}
-                <div class="gallery-item">
-                    <img src="{{ item.image.url }}" alt="{{ item.caption|default:project.title }}">
+                <div
+                    class="gallery-item"
+                    onclick="openLightbox({{ forloop.counter0 }})"
+                    style="cursor: pointer;"
+                >
+                    <img
+                        src="{{ item.image.url }}"
+                        alt="{{ item.caption|default:project.title }}"
+                        data-gallery-index="{{ forloop.counter0 }}"
+                    >
                 </div>
             {% endfor %}
         </div>
     {% endif %}
 
-    <!-- Back Button -->
-    <div style="margin-top: 50px; text-align: center;">
-        <a href="{% url 'portfolio:list' %}" class="btn btn-secondary">العودة لمعرض الأعمال</a>
+    <!-- Lightbox Modal -->
+    <div id="lightbox" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0, 0, 0, 0.95); align-items: center; justify-content: center;">
+
+        <!-- Close Button -->
+        <button
+            type="button"
+            onclick="closeLightbox()"
+            aria-label="إغلاق"
+            style="position: absolute; top: 20px; left: 20px; z-index: 10001; width: 50px; height: 50px; border: none; border-radius: 50%; background: rgba(255,255,255,0.15); color: white; font-size: 32px; cursor: pointer; transition: background 0.2s;"
+            onmouseover="this.style.background='rgba(255,255,255,0.25)'"
+            onmouseout="this.style.background='rgba(255,255,255,0.15)'"
+        >
+            ×
+        </button>
+
+        <!-- Previous Button -->
+        <button
+            type="button"
+            onclick="previousImage()"
+            aria-label="السابق"
+            style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); z-index: 10001; width: 55px; height: 55px; border: none; border-radius: 50%; background: rgba(255,255,255,0.15); color: white; font-size: 36px; cursor: pointer; transition: background 0.2s;"
+            onmouseover="this.style.background='rgba(255,255,255,0.25)'"
+            onmouseout="this.style.background='rgba(255,255,255,0.15)'"
+        >
+            ‹
+        </button>
+
+        <!-- Image Container -->
+        <div id="lightboxImageContainer" style="width: 90%; height: 85%; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+            <img
+                id="lightboxImage"
+                src=""
+                alt=""
+                style="max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.2s ease; user-select: none; -webkit-user-drag: none;"
+            >
+        </div>
+
+        <!-- Next Button -->
+        <button
+            type="button"
+            onclick="nextImage()"
+            aria-label="التالي"
+            style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); z-index: 10001; width: 55px; height: 55px; border: none; border-radius: 50%; background: rgba(255,255,255,0.15); color: white; font-size: 36px; cursor: pointer; transition: background 0.2s;"
+            onmouseover="this.style.background='rgba(255,255,255,0.25)'"
+            onmouseout="this.style.background='rgba(255,255,255,0.15)'"
+        >
+            ›
+        </button>
+
+        <!-- Zoom Controls -->
+        <div style="position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 10001;">
+            <button
+                type="button"
+                onclick="zoomOut()"
+                style="width: 50px; height: 50px; border: none; border-radius: 10px; background: rgba(255,255,255,0.15); color: white; font-size: 28px; cursor: pointer; transition: background 0.2s;"
+                onmouseover="this.style.background='rgba(255,255,255,0.25)'"
+                onmouseout="this.style.background='rgba(255,255,255,0.15)'"
+            >
+                −
+            </button>
+
+            <button
+                type="button"
+                onclick="resetZoom()"
+                style="width: 60px; height: 50px; border: none; border-radius: 10px; background: rgba(255,255,255,0.15); color: white; font-size: 16px; cursor: pointer; transition: background 0.2s;"
+                onmouseover="this.style.background='rgba(255,255,255,0.25)'"
+                onmouseout="this.style.background='rgba(255,255,255,0.15)'"
+            >
+                <span id="zoomLevel">100%</span>
+            </button>
+
+            <button
+                type="button"
+                onclick="zoomIn()"
+                style="width: 50px; height: 50px; border: none; border-radius: 10px; background: rgba(255,255,255,0.15); color: white; font-size: 28px; cursor: pointer; transition: background 0.2s;"
+                onmouseover="this.style.background='rgba(255,255,255,0.25)'"
+                onmouseout="this.style.background='rgba(255,255,255,0.15)'"
+            >
+                +
+            </button>
+        </div>
+
+        <!-- Image Counter -->
+        <div id="imageCounter" style="position: absolute; bottom: 25px; right: 25px; color: rgba(255,255,255,0.7); font-size: 14px; z-index: 10001;">
+            <!-- Will be updated by JavaScript -->
+        </div>
+
     </div>
 
+    <!-- Back Button - Fixed for Mobile -->
+    <div style="margin-top: 50px; margin-bottom: 30px; text-align: center; padding-bottom: 40px;">
+        <a href="{% url 'portfolio:list' %}" class="btn btn-secondary" style="padding: 16px 40px; font-size: 1.1rem; display: inline-block;">العودة لمعرض الأعمال</a>
+    </div>
+
+    <!-- Mobile Floating Back Button -->
+    <div class="mobile-back-btn" style="display: none; position: fixed; bottom: 20px; left: 20px; z-index: 1000;">
+        <a href="{% url 'portfolio:list' %}" style="display: flex; align-items: center; gap: 8px; background: var(--accent); color: #000; padding: 14px 24px; border-radius: 30px; font-weight: 700; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-decoration: none;">
+            <span style="font-size: 1.2rem;">←</span>
+            <span>العودة</span>
+        </a>
+    </div>
+
+    <style>
+        @media (max-width: 768px) {
+            .mobile-back-btn {
+                display: block !important;
+            }
+            .container > div:nth-last-child(2) {
+                display: none;
+            }
+        }
+    </style>
+
 </div>
+
+<script>
+// Gallery images array (passed from Django)
+const galleryImages = [
+    {% if project.cover_image %}
+        "{{ project.cover_image.url }}",
+    {% endif %}
+    {% for item in gallery_images %}
+        "{{ item.image.url }}"{% if not forloop.last %},{% endif %}
+    {% endfor %}
+];
+
+let currentIndex = 0;
+let currentZoom = 1;
+const minZoom = 0.5;
+const maxZoom = 3;
+const zoomStep = 0.25;
+
+const lightbox = document.getElementById('lightbox');
+const lightboxImage = document.getElementById('lightboxImage');
+const zoomLevelSpan = document.getElementById('zoomLevel');
+const imageCounter = document.getElementById('imageCounter');
+
+function openLightbox(index) {
+    currentIndex = index;
+    currentZoom = 1;
+    updateImage();
+    lightbox.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function openCoverImage() {
+    openLightbox(0);
+}
+
+function closeLightbox() {
+    lightbox.style.display = 'none';
+    document.body.style.overflow = '';
+    resetZoom();
+}
+
+function updateImage() {
+    if (galleryImages.length > 0 && currentIndex >= 0 && currentIndex < galleryImages.length) {
+        lightboxImage.src = galleryImages[currentIndex];
+        lightboxImage.style.transform = `scale(${currentZoom})`;
+        zoomLevelSpan.textContent = Math.round(currentZoom * 100) + '%';
+
+        // Update counter
+        imageCounter.textContent = `${currentIndex + 1} / ${galleryImages.length}`;
+    }
+}
+
+function nextImage() {
+    currentIndex = (currentIndex + 1) % galleryImages.length;
+    resetZoom();
+    updateImage();
+}
+
+function previousImage() {
+    currentIndex = (currentIndex - 1 + galleryImages.length) % galleryImages.length;
+    resetZoom();
+    updateImage();
+}
+
+function zoomIn() {
+    if (currentZoom < maxZoom) {
+        currentZoom = Math.min(currentZoom + zoomStep, maxZoom);
+        updateImage();
+    }
+}
+
+function zoomOut() {
+    if (currentZoom > minZoom) {
+        currentZoom = Math.max(currentZoom - zoomStep, minZoom);
+        updateImage();
+    }
+}
+
+function resetZoom() {
+    currentZoom = 1;
+    updateImage();
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', function(e) {
+    if (lightbox.style.display === 'flex') {
+        if (e.key === 'Escape') {
+            closeLightbox();
+        } else if (e.key === 'ArrowRight') {
+            previousImage(); // RTL: right arrow goes to previous
+        } else if (e.key === 'ArrowLeft') {
+            nextImage(); // RTL: left arrow goes to next
+        } else if (e.key === '+' || e.key === '=') {
+            zoomIn();
+        } else if (e.key === '-') {
+            zoomOut();
+        } else if (e.key === '0') {
+            resetZoom();
+        }
+    }
+});
+
+// Click outside image to close
+lightbox.addEventListener('click', function(e) {
+    if (e.target === lightbox || e.target.id === 'lightboxImageContainer') {
+        closeLightbox();
+    }
+});
+
+// Mouse wheel zoom
+lightboxImage.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    if (e.deltaY < 0) {
+        zoomIn();
+    } else {
+        zoomOut();
+    }
+});
+</script>
+
 {% endblock %}

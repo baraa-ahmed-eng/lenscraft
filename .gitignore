@@ -17,3 +17,18 @@ __pycache__/
 
 # Django generated files
 staticfiles/
+
+# Local uploads
+media/
+
+# Environment and test files
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Test and coverage artifacts
+.coverage
+htmlcov/
+.pytest_cache/

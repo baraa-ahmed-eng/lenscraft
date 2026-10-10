@@ -4,8 +4,13 @@ from portfolio.models import PortfolioProject
 
 def home(request):
     profile = PhotographerProfile.objects.first()
-    services = Service.objects.filter(is_active=True)
-    featured_projects = PortfolioProject.objects.filter(is_published=True,is_featured=True)
+    services = Service.objects.filter(is_active=True).only('id', 'title', 'description', 'icon_name')
+    featured_projects = PortfolioProject.objects.filter(
+        is_published=True,
+        is_featured=True
+    ).select_related('category').only(
+        'id', 'title', 'slug', 'cover_image', 'location', 'event_date', 'category__name'
+    )
     context = {
         'profile': profile,
         'services': services,

@@ -1,3 +1,4 @@
+
 {% extends 'base.html' %}
 
 {% block title %}معرض الأعمال | LensCraft{% endblock %}
@@ -15,6 +16,7 @@
         <a href="{% url 'portfolio:list' %}" class="filter-btn {% if not selected_category %}active{% endif %}">
             الكل
         </a>
+
         {% for category in categories %}
             <a href="{% url 'portfolio:category_filter' category.slug %}" class="filter-btn {% if selected_category == category %}active{% endif %}">
                 {{ category.name }}
@@ -26,22 +28,43 @@
     <div class="projects-grid">
         {% for project in projects %}
             <a href="{% url 'portfolio:detail' project.slug %}" class="project-card">
+
                 <div class="project-cover">
                     {% if project.cover_image %}
-                        <img src="{{ project.cover_image.url }}" alt="{{ project.title }}">
+                        <img
+                            src="{{ project.cover_image.url }}"
+                            alt="{{ project.title }}"
+                            loading="lazy"
+                            decoding="async"
+                        >
                     {% endif %}
                 </div>
+
                 <div class="project-info">
-                    <div class="project-category">{{ project.category.name }}</div>
-                    <h3 class="project-title">{{ project.title }}</h3>
+                    <div class="project-category">
+                        {{ project.category.name }}
+                    </div>
+
+                    <h3 class="project-title">
+                        {{ project.title }}
+                    </h3>
+
                     <div class="project-meta">
-                        {% if project.location %}<span>📍 {{ project.location }}</span>{% endif %}
-                        {% if project.event_date %}<span>📅 {{ project.event_date|date:"Y-m-d" }}</span>{% endif %}
+                        {% if project.location %}
+                            <span>📍 {{ project.location }}</span>
+                        {% endif %}
+
+                        {% if project.event_date %}
+                            <span>📅 {{ project.event_date|date:"Y-m-d" }}</span>
+                        {% endif %}
                     </div>
                 </div>
+
             </a>
         {% empty %}
-            <p class="section-desc" style="grid-column: 1 / -1;">لا توجد مشاريع مضافة في هذا التصنيف حالياً.</p>
+            <p class="section-desc" style="grid-column: 1 / -1;">
+                لا توجد مشاريع مضافة في هذا التصنيف حالياً.
+            </p>
         {% endfor %}
     </div>
 
